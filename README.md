@@ -1,5 +1,7 @@
 # Application Task Progate DTS
 
+https://github.com/alexandresanlim/Badges4-README.md-Profile
+
 # Find Me
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/suharyadi-3423a3193/)
@@ -16,7 +18,7 @@
 
 # Databases
 
-[![Postgres](https://img.shields.io/badge/postgres-%23563D7C.svg?style=for-the-badge&logo=postgres&logoColor=white)](https://www.postgresql.org/)
+[![Postgres](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 
 # Description
 
