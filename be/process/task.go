@@ -18,14 +18,13 @@ type Response struct {
     Data []Task `json:"data"`//get data berdasarkan struct Task, untuk response
 }
 
+//dapatkan semua data dari task
 func Gettask(w http.ResponseWriter, r *http.Request){
 
     // semua origin mendapat ijin akses
     w.Header().Set("Access-Control-Allow-Origin", "*")
-
     // semua method diperbolehkan masuk
     w.Header().Set("Access-Control-Allow-Methods", "*")
-
     // semua header diperbolehkan untuk disisipkan
     w.Header().Set("Access-Control-Allow-Headers", "*")
 
