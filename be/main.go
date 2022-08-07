@@ -12,9 +12,10 @@ import(
 func main(){
 	
 	r := chi.NewRouter()//Chi Route
-	r.Use(middleware.Logger)
-
-	r.Get("/task", b.Gettask)// get all task
+	r.Route("/progatedts", func(r chi.Router) {
+		r.Use(middleware.Logger)
+		r.Get("/task", b.Gettask)//all task
+	})
 	
 	http.ListenAndServe(":8080", r)//web service running
 }
