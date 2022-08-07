@@ -3,7 +3,7 @@ package main
 import(
 	"net/http"
 
-	b "be/task/task_process"//mengimport file lain untuk digunakan functionnya
+	b "be_progate_task/process"//mengimport file lain untuk digunakan functionnya
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
