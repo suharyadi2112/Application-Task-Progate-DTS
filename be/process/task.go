@@ -5,14 +5,15 @@ import(
 	"net/http"
 	outp "be_progate_task/connection"
 
-    "github.com/go-chi/chi/v5"
+    "github.com/go-chi/chi/v5"//routing
+    "io/ioutil"//post
 )
 
 type Task struct {
     Id string `json:"id"`
-    Task string `json:"task"`
+    Task string `json:"task", validate:"required"`
     Assignee string `json:"assigne"`
-    Date string `json:"date"`
+    Deadline string `json:"date"`
     Status string `json:"status"`
 }
 type ResponseArr struct {
@@ -55,7 +56,7 @@ func Gettask(w http.ResponseWriter, r *http.Request){
 
     for row.Next(){//looping data
         var each = Task{}//Task dari struct
-        var err = row.Scan(&each.Id, &each.Task, &each.Assignee, &each.Date, &each.Status)
+        var err = row.Scan(&each.Id, &each.Task, &each.Assignee, &each.Deadline, &each.Status)
 
         if err != nil {
             http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -97,7 +98,7 @@ func Gettask_byid(w http.ResponseWriter, r *http.Request){
 
     row := db.QueryRow(SqlQuery, userID)
 
-    err = row.Scan(&task.Id, &task.Task, &task.Assignee, &task.Date, &task.Status)
+    err = row.Scan(&task.Id, &task.Task, &task.Assignee, &task.Deadline, &task.Status)
 
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -108,5 +109,49 @@ func Gettask_byid(w http.ResponseWriter, r *http.Request){
     var res = ResponseSingle{Status : "success", Data : task}
     
     json.NewEncoder(w).Encode(res)
-
 }
+
+//tambah task
+func PostTask(w http.ResponseWriter, r *http.Request){
+
+    w.Header().Set("Content-Type", "application/json")
+    // semua origin mendapat ijin akses
+    w.Header().Set("Access-Control-Allow-Origin", "*")
+    // semua method diperbolehkan masuk
+    w.Header().Set("Access-Control-Allow-Methods", "*")
+    // semua header diperbolehkan untuk disisipkan
+    w.Header().Set("Access-Control-Allow-Headers", "*")
+
+    db, err := outp.Dbcon()//koneksi
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+    defer db.Close()
+
+    taskStruct := Task{}//gunakan jika masukan bukan array
+
+    body, _ := ioutil.ReadAll(r.Body)
+    json.Unmarshal(body, &taskStruct)
+
+    task := taskStruct.Task
+    assignee := taskStruct.Assignee
+    deadline := taskStruct.Deadline
+    status := taskStruct.Status
+
+    sqlStatement := `INSERT INTO task (task, assignee, deadline, status) VALUES ($1, $2, $3, $4)`
+
+    _, err = db.Exec(sqlStatement, task,assignee,deadline,status)
+
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    var res = ResponseSingle{Status : "success", Data : taskStruct}
+    
+    json.NewEncoder(w).Encode(res)
+
+    defer db.Close()
+}
+
