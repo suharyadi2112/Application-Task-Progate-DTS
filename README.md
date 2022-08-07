@@ -16,7 +16,7 @@
 
 # Databases
 
-[![Postgres](https://img.shields.io/badge/postgres-%23563D7C.svg?style=for-the-badge&logo=postgres&logoColor=white)](https://getbootstrap.com/)
+[![Postgres](https://img.shields.io/badge/postgres-%23563D7C.svg?style=for-the-badge&logo=postgres&logoColor=white)](https://www.postgresql.org/)
 
 # Description
 
