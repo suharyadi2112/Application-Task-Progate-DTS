@@ -16,6 +16,7 @@ func main(){
 		r.Use(middleware.Logger)
 		r.Get("/task", b.Gettask)//all task
 		r.Get("/task_id/{userID}", b.Gettask_byid)//task by id
+		r.Post("/task_post", b.PostTask)//post task
 	})
 	
 	http.ListenAndServe(":8080", r)//web service running
