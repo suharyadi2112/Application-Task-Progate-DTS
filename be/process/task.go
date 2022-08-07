@@ -2,8 +2,12 @@ package taskdata
 
 import(
 	"encoding/json"
+    "fmt"
 	"net/http"
 	outp "be_progate_task/connection"
+
+    "github.com/go-chi/chi/v5"
+
 )
 
 type Task struct {
@@ -64,4 +68,18 @@ func Gettask(w http.ResponseWriter, r *http.Request){
     
     json.NewEncoder(w).Encode(res)
 	
+}
+
+//dapatkan data berdasarkan id
+func Gettask_byid(w http.ResponseWriter, r *http.Request){
+
+    userID := chi.URLParam(r, "userID")
+
+    // fetch `"key"` from the request context
+    ctx := r.Context()
+    key := ctx.Value("key").(string)
+
+    // respond to the client
+    w.Write([]byte(fmt.Sprintf("hi %v, %v", userID, key)))
+
 }
