@@ -2,12 +2,10 @@ package taskdata
 
 import(
 	"encoding/json"
-    "fmt"
 	"net/http"
 	outp "be_progate_task/connection"
 
     "github.com/go-chi/chi/v5"
-
 )
 
 type Task struct {
@@ -17,9 +15,13 @@ type Task struct {
     Date string `json:"date"`
     Status string `json:"status"`
 }
-type Response struct {
+type ResponseArr struct {
     Status string `json:"status"`
-    Data []Task `json:"data"`//get data berdasarkan struct Task, untuk response
+    Data []Task `json:"data"`
+}
+type ResponseSingle struct{
+    Status string `json:"status"`
+    Data Task `json:"data"`
 }
 
 //dapatkan semua data dari task
@@ -64,7 +66,7 @@ func Gettask(w http.ResponseWriter, r *http.Request){
     
     defer db.Close()
 
-    var res = Response{Status : "success", Data : result}
+    var res = ResponseArr{Status : "success", Data : result}
     
     json.NewEncoder(w).Encode(res)
 	
@@ -73,13 +75,38 @@ func Gettask(w http.ResponseWriter, r *http.Request){
 //dapatkan data berdasarkan id
 func Gettask_byid(w http.ResponseWriter, r *http.Request){
 
+    // semua origin mendapat ijin akses
+    w.Header().Set("Access-Control-Allow-Origin", "*")
+    // semua method diperbolehkan masuk
+    w.Header().Set("Access-Control-Allow-Methods", "*")
+    // semua header diperbolehkan untuk disisipkan
+    w.Header().Set("Access-Control-Allow-Headers", "*")
+
     userID := chi.URLParam(r, "userID")
 
-    // fetch `"key"` from the request context
-    ctx := r.Context()
-    key := ctx.Value("key").(string)
+    db, err := outp.Dbcon()
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+    defer db.Close()
 
-    // respond to the client
-    w.Write([]byte(fmt.Sprintf("hi %v, %v", userID, key)))
+    SqlQuery := `SELECT * FROM task WHERE id=$1;`
+
+    var task Task
+
+    row := db.QueryRow(SqlQuery, userID)
+
+    err = row.Scan(&task.Id, &task.Task, &task.Assignee, &task.Date, &task.Status)
+
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+    defer db.Close()
+
+    var res = ResponseSingle{Status : "success", Data : task}
+    
+    json.NewEncoder(w).Encode(res)
 
 }
