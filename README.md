@@ -26,7 +26,19 @@ employees of the company to record tasks submitted to employees who
 other. This project is needed because employees often give tasks to employees
 another employee, but forgot that there was a task given to another employee along with the date
 the deadline.
+  
+# Fill in task details
 
+<ol>
+  <li>To which employee the task is addressed</li>
+  <li>Deadlines of tasks</li>
+  <li>Task Reading feature (Read)</li>
+  <li>We can see the previously added tasks</li>
+  <li>Task Editing (Update) feature</li>
+  <li>We can change the contents of the task that we create.</li>
+  <li>Recording feature whether the task is complete</li>
+  <li>We can mark whether a task has been completed or not.</li>
+</ol>
 
-------Icon badge used---------
+------Icon badge used---------<br>
 https://github.com/alexandresanlim/Badges4-README.md-Profile
