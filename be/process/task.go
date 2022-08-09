@@ -11,10 +11,10 @@ import(
 
 type Task struct {
     Id string `json:"id"`
-    Task string `json:"task"`
-    Assignee string `json:"assignee"`
-    Deadline string `json:"deadline"`
-    Status string `json:"status"`
+    Task *string `json:"task"`
+    Assignee *string `json:"assignee"`
+    Deadline *string `json:"deadline"`
+    Status *string `json:"status"`
 }
 type ResponseArr struct {
     Status string `json:"status"`
@@ -195,7 +195,7 @@ func DelTask_id(w http.ResponseWriter, r *http.Request){
 		}
 
 }
-
+//update task diluar status
 func UpTask_id(w http.ResponseWriter, r *http.Request){
 
 	    // semua origin mendapat ijin akses
@@ -225,6 +225,49 @@ func UpTask_id(w http.ResponseWriter, r *http.Request){
 	    status := taskStruct.Status
 
 			result, err := db.Exec("UPDATE task SET task = $2, assignee = $3, deadline = $4, status = $5 WHERE id = $1" , userID,task, assignee,deadline,status)
+
+			if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+			}
+
+			rows, err := result.RowsAffected()
+			defer db.Close()
+			if rows != 1 {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}else{
+				json.NewEncoder(w).Encode("success")
+			}
+
+}
+
+//update task status selesai atau belum
+func ChangeStatusTask(w http.ResponseWriter, r *http.Request){
+
+	    // semua origin mendapat ijin akses
+	    w.Header().Set("Access-Control-Allow-Origin", "*")
+	    // semua method diperbolehkan masuk
+	    w.Header().Set("Access-Control-Allow-Methods", "*")
+	    // semua header diperbolehkan untuk disisipkan
+	    w.Header().Set("Access-Control-Allow-Headers", "*")
+
+	    userID := chi.URLParam(r, "userID")
+
+			db, err := outp.Dbcon()//koneksi
+			if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+			}
+			defer db.Close()
+
+			taskStruct := Task{}//gunakan jika masukan bukan array
+
+	    body, _ := ioutil.ReadAll(r.Body)
+	    json.Unmarshal(body, &taskStruct)
+
+	    CStatus := taskStruct.Status
+
+			result, err := db.Exec("UPDATE task SET status = $2 WHERE id = $1" , userID, CStatus)
 
 			if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
