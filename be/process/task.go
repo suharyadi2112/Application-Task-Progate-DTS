@@ -222,9 +222,8 @@ func UpTask_id(w http.ResponseWriter, r *http.Request){
 	    task := taskStruct.Task
 	    assignee := taskStruct.Assignee
 	    deadline := taskStruct.Deadline
-	    status := taskStruct.Status
 
-			result, err := db.Exec("UPDATE task SET task = $2, assignee = $3, deadline = $4, status = $5 WHERE id = $1" , userID,task, assignee,deadline,status)
+			result, err := db.Exec("UPDATE task SET task = $2, assignee = $3, deadline = $4 WHERE id = $1" , userID,task, assignee,deadline)
 
 			if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
