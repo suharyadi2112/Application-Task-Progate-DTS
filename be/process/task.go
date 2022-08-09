@@ -3,10 +3,9 @@ package taskdata
 import(
 	"encoding/json"
 	"net/http"
-	outp "be_progate_task/connection"
+	outp "be_progate_task/connection"//koneksi
 
-    "github.com/go-chi/chi/v5"//routing
-    "io/ioutil"//post
+	"github.com/gorilla/mux"//routing mux
 )
 
 type Task struct {
@@ -44,7 +43,7 @@ func Gettask(w http.ResponseWriter, r *http.Request){
 
     defer db.Close()
 
-    row, err := db.Query("Select * from task")//query dari mysql
+    row, err := db.Query("Select * from task")//query dari sql
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
@@ -83,7 +82,8 @@ func Gettask_byid(w http.ResponseWriter, r *http.Request){
     // semua header diperbolehkan untuk disisipkan
     w.Header().Set("Access-Control-Allow-Headers", "*")
 
-    userID := chi.URLParam(r, "userID")
+    vars := mux.Vars(r)
+    userID := vars["userID"]
 
     db, err := outp.Dbcon()
     if err != nil {
@@ -98,7 +98,7 @@ func Gettask_byid(w http.ResponseWriter, r *http.Request){
 
     row := db.QueryRow(SqlQuery, userID)
 
-    err = row.Scan(&task.Id, &task.Task, &task.Assignee, &task.Deadline, &task.Status)
+    err = row.Scan(&task.Id, &task.Task, &task.Assignee, &task.Status,&task.Deadline)
 
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -114,7 +114,6 @@ func Gettask_byid(w http.ResponseWriter, r *http.Request){
 //tambah task
 func PostTask(w http.ResponseWriter, r *http.Request){
 
-    w.Header().Set("Content-Type", "application/json")
     // semua origin mendapat ijin akses
     w.Header().Set("Access-Control-Allow-Origin", "*")
     // semua method diperbolehkan masuk
@@ -137,21 +136,15 @@ func PostTask(w http.ResponseWriter, r *http.Request){
   	
     sqlStatement := `INSERT INTO task (task, assignee, deadline, status) VALUES ($1, $2, $3, $4)`
 
-    result, err := db.Exec(sqlStatement, task,assignee,deadline,status)
+    _, err = db.Exec(sqlStatement, task,assignee,deadline,status)
 
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
     }
-		defer db.Close()
-
-		rows, err := result.RowsAffected()
-
-		if rows != 1 {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}else{
-			json.NewEncoder(w).Encode("success")
-		}
+	defer db.Close()
+	
+	json.NewEncoder(w).Encode("success")
 
 }
 
@@ -165,7 +158,8 @@ func DelTask_id(w http.ResponseWriter, r *http.Request){
     // semua header diperbolehkan untuk disisipkan
     w.Header().Set("Access-Control-Allow-Headers", "*")
 
-    userID := chi.URLParam(r, "userID")
+    vars := mux.Vars(r)
+    userID := vars["userID"]
 
 	db, err := outp.Dbcon()//koneksi
 	if err != nil {
@@ -200,38 +194,34 @@ func UpTask_id(w http.ResponseWriter, r *http.Request){
     // semua header diperbolehkan untuk disisipkan
     w.Header().Set("Access-Control-Allow-Headers", "*")
 
-    userID := chi.URLParam(r, "userID")
-
-		db, err := outp.Dbcon()//koneksi
-		if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-		}
-		defer db.Close()
-
-		taskStruct := Task{}//gunakan jika masukan bukan array
-
-    body, _ := ioutil.ReadAll(r.Body)
-    json.Unmarshal(body, &taskStruct)
-
-    task := taskStruct.Task
-    assignee := taskStruct.Assignee
-    deadline := taskStruct.Deadline
-
-		result, err := db.Exec("UPDATE task SET task = $2, assignee = $3, deadline = $4 WHERE id = $1" , userID,task, assignee,deadline)
-
-		if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-		}
-
-		rows, err := result.RowsAffected()
-		defer db.Close()
-		if rows != 1 {
+	db, err := outp.Dbcon()//koneksi
+	if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}else{
-			json.NewEncoder(w).Encode("success")
-		}
+			return
+	}
+	defer db.Close()
+
+	vars := mux.Vars(r)
+    userID := vars["userID"]//get param mux
+
+	task := r.FormValue("task")
+    assignee := r.FormValue("assignee")
+    deadline := r.FormValue("deadline")
+
+	result, err := db.Exec("UPDATE task SET task = $2, assignee = $3, deadline = $4 WHERE id = $1" , userID,task, assignee,deadline)
+
+	if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+	}
+
+	rows, err := result.RowsAffected()
+	defer db.Close()
+	if rows != 1 {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}else{
+		json.NewEncoder(w).Encode("success")
+	}
 
 }
 
@@ -245,35 +235,31 @@ func ChangeStatusTask(w http.ResponseWriter, r *http.Request){
     // semua header diperbolehkan untuk disisipkan
     w.Header().Set("Access-Control-Allow-Headers", "*")
 
-    userID := chi.URLParam(r, "userID")
+    vars := mux.Vars(r)
+    userID := vars["userID"]
 
-		db, err := outp.Dbcon()//koneksi
-		if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-		}
-		defer db.Close()
+	db, err := outp.Dbcon()//koneksi
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
 
-		taskStruct := Task{}//gunakan jika masukan bukan array
+    CStatus := "1"
 
-    body, _ := ioutil.ReadAll(r.Body)
-    json.Unmarshal(body, &taskStruct)
+	result, err := db.Exec("UPDATE task SET status = $2 WHERE id = $1" , userID, CStatus)
 
-    CStatus := taskStruct.Status
-
-		result, err := db.Exec("UPDATE task SET status = $2 WHERE id = $1" , userID, CStatus)
-
-		if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-		}
-
-		rows, err := result.RowsAffected()
-		defer db.Close()
-		if rows != 1 {
+	if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}else{
-			json.NewEncoder(w).Encode("success")
-		}
+			return
+	}
+
+	rows, err := result.RowsAffected()
+	defer db.Close()
+	if rows != 1 {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}else{
+		json.NewEncoder(w).Encode("success")
+	}
 
 }
