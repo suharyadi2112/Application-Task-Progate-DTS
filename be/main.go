@@ -18,6 +18,7 @@ func main(){
 		r.Get("/task_id/{userID}", b.Gettask_byid)//task by id
 		r.Post("/task_post", b.PostTask)//post task
 		r.Delete("/task_del/{userID}", b.DelTask_id)//post task
+		r.Put("/task_up/{userID}", b.UpTask_id)//post task
 
 	})
 
