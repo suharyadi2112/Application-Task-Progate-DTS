@@ -171,6 +171,20 @@ func DelTask_id(w http.ResponseWriter, r *http.Request){
 
     userID := chi.URLParam(r, "userID")
 
-		json.NewEncoder(w).Encode(userID)
+		db, err := outp.Dbcon()//koneksi
+		if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+		}
+
+		defer db.Close()
+		_, err = db.Exec("DELETE FROM task WHERE id=$1", userID)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		defer db.Close()
+
+		json.NewEncoder(w).Encode("success")
 
 }
