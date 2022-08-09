@@ -188,3 +188,24 @@ func DelTask_id(w http.ResponseWriter, r *http.Request){
 		json.NewEncoder(w).Encode("success")
 
 }
+
+func UpTask_id(w http.ResponseWriter, r *http.Request){
+
+	    // semua origin mendapat ijin akses
+	    w.Header().Set("Access-Control-Allow-Origin", "*")
+	    // semua method diperbolehkan masuk
+	    w.Header().Set("Access-Control-Allow-Methods", "*")
+	    // semua header diperbolehkan untuk disisipkan
+	    w.Header().Set("Access-Control-Allow-Headers", "*")
+
+	    userID := chi.URLParam(r, "userID")
+
+			db, err := outp.Dbcon()//koneksi
+			if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+			}
+
+	
+			json.NewEncoder(w).Encode("success")
+}
