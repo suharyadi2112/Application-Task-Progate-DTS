@@ -7,8 +7,6 @@ import(
 
     "github.com/go-chi/chi/v5"//routing
     "io/ioutil"//post
-
-		"fmt"
 )
 
 type Task struct {
@@ -141,11 +139,9 @@ func PostTask(w http.ResponseWriter, r *http.Request){
     deadline := taskStruct.Deadline
     status := taskStruct.Status
 
-		fmt.Println(assignee, deadline,task)
-
     sqlStatement := `INSERT INTO task (task, assignee, deadline, status) VALUES ($1, $2, $3, $4)`
 
-    _, err = db.Exec(sqlStatement, task,assignee,deadline,status)
+    result, err := db.Exec(sqlStatement, task,assignee,deadline,status)
 
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -153,9 +149,14 @@ func PostTask(w http.ResponseWriter, r *http.Request){
     }
 		defer db.Close()
 
-    var res = ResponseSingle{Status : "success", Data : taskStruct}
+		rows, err := result.RowsAffected()
 
-    json.NewEncoder(w).Encode(res)
+		if rows != 1 {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}else{
+			var res = ResponseSingle{Status : "success", Data : taskStruct}
+			json.NewEncoder(w).Encode(res)
+		}
 
 }
 
@@ -178,14 +179,20 @@ func DelTask_id(w http.ResponseWriter, r *http.Request){
 		}
 
 		defer db.Close()
-		_, err = db.Exec("DELETE FROM task WHERE id=$1", userID)
+		result, err := db.Exec("DELETE FROM task WHERE id=$1", userID)
 
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 		defer db.Close()
 
-		json.NewEncoder(w).Encode("success")
+		rows, err := result.RowsAffected()
+
+		if rows != 1 {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}else{
+			json.NewEncoder(w).Encode("success")
+		}
 
 }
 
@@ -205,7 +212,31 @@ func UpTask_id(w http.ResponseWriter, r *http.Request){
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
 			}
+			defer db.Close()
 
-	
-			json.NewEncoder(w).Encode("success")
+			taskStruct := Task{}//gunakan jika masukan bukan array
+
+	    body, _ := ioutil.ReadAll(r.Body)
+	    json.Unmarshal(body, &taskStruct)
+
+	    task := taskStruct.Task
+	    assignee := taskStruct.Assignee
+	    deadline := taskStruct.Deadline
+	    status := taskStruct.Status
+
+			result, err := db.Exec("UPDATE task SET task = $2, assignee = $3, deadline = $4, status = $5 WHERE id = $1" , userID,task, assignee,deadline,status)
+
+			if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+			}
+
+			rows, err := result.RowsAffected()
+			defer db.Close()
+			if rows != 1 {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}else{
+				json.NewEncoder(w).Encode("success")
+			}
+
 }
