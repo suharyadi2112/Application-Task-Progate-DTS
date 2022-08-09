@@ -3,7 +3,7 @@ package connect
 import(
 	"fmt"
     "database/sql"
-    _ "github.com/lib/pq"
+    _ "github.com/lib/pq"// postgres
     "os"
 )
 
