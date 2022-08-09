@@ -2,6 +2,7 @@ package main
 
 import(
 	"net/http"
+	"fmt"
 
 	b "be_progate_task/process"//mengimport file lain untuk digunakan functionnya
 
@@ -22,6 +23,6 @@ func main(){
 		r.Put("/task_changestatus/{userID}", b.ChangeStatusTask)//update status task
 
 	})
-
+	fmt.Println("server started at localhost:9999")
 	http.ListenAndServe(":9999", r)//web service running
 }
