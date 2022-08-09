@@ -7,13 +7,15 @@ import(
 
     "github.com/go-chi/chi/v5"//routing
     "io/ioutil"//post
+
+		"fmt"
 )
 
 type Task struct {
     Id string `json:"id"`
     Task string `json:"task", validate:"required"`
-    Assignee string `json:"assigne"`
-    Deadline string `json:"date"`
+    Assignee string `json:"assignee"`
+    Deadline string `json:"deadline"`
     Status string `json:"status"`
 }
 type ResponseArr struct {
@@ -138,6 +140,8 @@ func PostTask(w http.ResponseWriter, r *http.Request){
     assignee := taskStruct.Assignee
     deadline := taskStruct.Deadline
     status := taskStruct.Status
+
+		fmt.Println(assignee, deadline,task)
 
     sqlStatement := `INSERT INTO task (task, assignee, deadline, status) VALUES ($1, $2, $3, $4)`
 
