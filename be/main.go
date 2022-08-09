@@ -1,4 +1,4 @@
-package main 
+package main
 
 import(
 	"net/http"
@@ -17,8 +17,9 @@ func main(){
 		r.Get("/task", b.Gettask)//all task
 		r.Get("/task_id/{userID}", b.Gettask_byid)//task by id
 		r.Post("/task_post", b.PostTask)//post task
-		r.Delete("/task_del/{userID}", b.DelTask_id)//post task
-		r.Put("/task_up/{userID}", b.UpTask_id)//post task
+		r.Delete("/task_del/{userID}", b.DelTask_id)//delete task
+		r.Put("/task_up/{userID}", b.UpTask_id)//update task
+		r.Put("/task_changestatus/{userID}", b.ChangeStatusTask)//update status task
 
 	})
 
