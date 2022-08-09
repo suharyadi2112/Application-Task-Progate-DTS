@@ -56,7 +56,7 @@ func Gettask(w http.ResponseWriter, r *http.Request){
 
     for row.Next(){//looping data
         var each = Task{}//Task dari struct
-        var err = row.Scan(&each.Id, &each.Task, &each.Assignee, &each.Deadline, &each.Status)
+        var err = row.Scan(&each.Id, &each.Task, &each.Assignee, &each.Status,&each.Deadline)
 
         if err != nil {
             http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -122,6 +122,7 @@ func PostTask(w http.ResponseWriter, r *http.Request){
     // semua header diperbolehkan untuk disisipkan
     w.Header().Set("Access-Control-Allow-Headers", "*")
 
+	
     db, err := outp.Dbcon()//koneksi
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -129,16 +130,11 @@ func PostTask(w http.ResponseWriter, r *http.Request){
     }
     defer db.Close()
 
-    taskStruct := Task{}//gunakan jika masukan bukan array
-
-    body, _ := ioutil.ReadAll(r.Body)
-    json.Unmarshal(body, &taskStruct)
-
-    task := taskStruct.Task
-    assignee := taskStruct.Assignee
-    deadline := taskStruct.Deadline
-    status := taskStruct.Status
-
+    task := r.FormValue("task")
+    assignee := r.FormValue("assignee")
+    deadline := r.FormValue("deadline")
+    status := "0"
+  	
     sqlStatement := `INSERT INTO task (task, assignee, deadline, status) VALUES ($1, $2, $3, $4)`
 
     result, err := db.Exec(sqlStatement, task,assignee,deadline,status)
@@ -154,8 +150,7 @@ func PostTask(w http.ResponseWriter, r *http.Request){
 		if rows != 1 {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}else{
-			var res = ResponseSingle{Status : "success", Data : taskStruct}
-			json.NewEncoder(w).Encode(res)
+			json.NewEncoder(w).Encode("success")
 		}
 
 }
