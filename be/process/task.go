@@ -151,11 +151,26 @@ func PostTask(w http.ResponseWriter, r *http.Request){
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
     }
+		defer db.Close()
 
     var res = ResponseSingle{Status : "success", Data : taskStruct}
-    
+
     json.NewEncoder(w).Encode(res)
 
-    defer db.Close()
 }
 
+//delete data berdasarkan id
+func DelTask_id(w http.ResponseWriter, r *http.Request){
+
+    // semua origin mendapat ijin akses
+    w.Header().Set("Access-Control-Allow-Origin", "*")
+    // semua method diperbolehkan masuk
+    w.Header().Set("Access-Control-Allow-Methods", "*")
+    // semua header diperbolehkan untuk disisipkan
+    w.Header().Set("Access-Control-Allow-Headers", "*")
+
+    userID := chi.URLParam(r, "userID")
+
+		json.NewEncoder(w).Encode(userID)
+
+}
