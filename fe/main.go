@@ -4,7 +4,7 @@ import(
     "fmt"
     "net/http"
     "html/template"
-    "github.com/go-chi/chi/v5"
+    "github.com/go-chi/chi/v5"//chiroute
     "github.com/go-chi/chi/v5/middleware"
  )
 
@@ -18,7 +18,7 @@ func home(w http.ResponseWriter, r *http.Request){
 //edit
 func edit(w http.ResponseWriter, r *http.Request){
 
-    Taskid := chi.URLParam(r, "task_id")
+    Taskid := chi.URLParam(r, "task_id")// chi get param
     var tmpl = template.Must(template.New("edit").ParseFiles("edit.html"))
     var data_id = map[string]interface{}{
         "id_task": Taskid,
@@ -37,7 +37,7 @@ func main() {
     //start routing
     r.Get("/", home)//home
     r.Get("/home", home)//home
-    r.Get("/edit/{task_id}", edit)//home
+    r.Get("/edit/{task_id}", edit)//edit
 
     fmt.Println("server started at localhost:9000")
     http.ListenAndServe(":9000", r)
