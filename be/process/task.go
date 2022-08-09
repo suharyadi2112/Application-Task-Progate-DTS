@@ -1,4 +1,4 @@
-package taskdata 
+package taskdata
 
 import(
 	"encoding/json"
@@ -11,7 +11,7 @@ import(
 
 type Task struct {
     Id string `json:"id"`
-    Task string `json:"task", validate:"required"`
+    Task string `json:"task"`
     Assignee string `json:"assignee"`
     Deadline string `json:"deadline"`
     Status string `json:"status"`
@@ -41,7 +41,7 @@ func Gettask(w http.ResponseWriter, r *http.Request){
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
     }
-    
+
     defer db.Close()
 
     row, err := db.Query("Select * from task")//query dari mysql
@@ -64,13 +64,13 @@ func Gettask(w http.ResponseWriter, r *http.Request){
         }
         result = append(result, each)
     }
-    
+
     defer db.Close()
 
     var res = ResponseArr{Status : "success", Data : result}
-    
+
     json.NewEncoder(w).Encode(res)
-	
+
 }
 
 //dapatkan data berdasarkan id
@@ -107,7 +107,7 @@ func Gettask_byid(w http.ResponseWriter, r *http.Request){
     defer db.Close()
 
     var res = ResponseSingle{Status : "success", Data : task}
-    
+
     json.NewEncoder(w).Encode(res)
 }
 
