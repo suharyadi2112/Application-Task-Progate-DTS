@@ -15,7 +15,7 @@ func Dbcon() (*sql.DB, error) {
     os.Setenv("DB_PORT", "5432")
     os.Setenv("DB_USERNAME", "postgres")
     os.Setenv("DB_PASSWORD", "12345678")
-    os.Setenv("DB_NAME", "postgres")
+    os.Setenv("DB_NAME", "task_progatedts")
 
     // Get the value of an Environment Variable
     host := os.Getenv("DB_HOST")
