@@ -44,12 +44,9 @@ the deadline.
 
 <h3>Dashboard, Add, Edit Task</h3>
 
-Dashboard Task             |  Add Task
-:-------------------------:|:-------------------------:
-<img src="https://user-images.githubusercontent.com/105489642/183814410-a2773d1e-4681-4078-9e42-db1f6b308459.jpg"> |  <img src="https://user-images.githubusercontent.com/105489642/183814715-fe620ed3-0c09-4eea-9392-24b7a0665768.jpg"> 
-Dashboard Task             
-:-------------------------:
-<img src="https://user-images.githubusercontent.com/105489642/183814721-dffb0568-98ee-416b-94e7-65da9d3e21b3.jpg">
+Dashboard Task             |  Edit Task                 | Add Task
+:-------------------------:|:-------------------------:|:-------------------------:
+<img src="https://user-images.githubusercontent.com/105489642/183814410-a2773d1e-4681-4078-9e42-db1f6b308459.jpg"> |  <img src="https://user-images.githubusercontent.com/105489642/183814715-fe620ed3-0c09-4eea-9392-24b7a0665768.jpg"> | <img src="https://user-images.githubusercontent.com/105489642/183814721-dffb0568-98ee-416b-94e7-65da9d3e21b3.jpg">
 
 ------Icon badge used---------<br>
 https://github.com/alexandresanlim/Badges4-README.md-Profile
