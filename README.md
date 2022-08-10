@@ -40,6 +40,19 @@ the deadline.
   <li>We can mark whether a task has been completed or not.</li>
 </ol>
 
+# run app
+run 'be' folder for API data
+  .
+    ├── be                      # folder for API data
+    │   ├── connection          # connection databases use postgres
+    │   ├── process             # process controller
+    │   └── main.go             # Unit tests
+    └── fe
+  ```sh
+  go run main.go
+  ```
+
+
 # Some Screenshots
 
 <h3>Dashboard, Add, Edit Task</h3>
