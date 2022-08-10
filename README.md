@@ -47,9 +47,9 @@ Dashboard Task | Add Task
 :-------------------------:|:-------------------------:
 <img src="https://user-images.githubusercontent.com/105489642/183814410-a2773d1e-4681-4078-9e42-db1f6b308459.jpg"> | <img src="https://user-images.githubusercontent.com/105489642/183814715-fe620ed3-0c09-4eea-9392-24b7a0665768.jpg"> 
 
-Dashboard Cuti             |  Add Period Cuti
+Dashboard Task             |  Add Task
 :-------------------------:|:-------------------------:
-<img src="https://user-images.githubusercontent.com/105489642/168763205-3b9c7958-bc9a-45c4-a81f-b9214af36824.jpg">  |  <img src="https://user-images.githubusercontent.com/105489642/168764589-3092f911-0423-4377-a4dd-a143f8c4ed2a.jpg">
+<img src="https://user-images.githubusercontent.com/105489642/183814410-a2773d1e-4681-4078-9e42-db1f6b308459.jpg"> |  <img src="https://user-images.githubusercontent.com/105489642/183814715-fe620ed3-0c09-4eea-9392-24b7a0665768.jpg"> 
 
 
 <img src="https://user-images.githubusercontent.com/105489642/183814721-dffb0568-98ee-416b-94e7-65da9d3e21b3.jpg"> |
