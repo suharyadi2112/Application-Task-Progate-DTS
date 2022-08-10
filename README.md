@@ -55,6 +55,25 @@ run 'be' folder for API data
     │   └── main.go           # Unit tests
     └── ...
 
+> server will be running, server started at localhost:9999 
+
+run 'fe' folder for Application at browser
+> go into the folder 'fe' and run file main.go
+ 
+  ```sh
+  go run main.go
+  ```
+    .
+    ├── ...
+    ├── fe                   # folder for frontend
+    │   ├── edit.html        # edit task
+    │   ├── index.html       # dashboard task
+    │   └── main.go          # Unit tests
+    └── ...
+
+> go to browser and enter this url, server started at localhost:9000 
+
+
 # Some Screenshots
 
 <h3>Dashboard, Add, Edit Task</h3>
