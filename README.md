@@ -42,10 +42,7 @@ the deadline.
 
 # Some Screenshots
 
-<h3>Dashboard Task</h3>
-
-Dashboard Task              
-:-------------------------:
+<h3>Dashboard, Add, Edit Task</h3>
 <img src="https://user-images.githubusercontent.com/105489642/183814410-a2773d1e-4681-4078-9e42-db1f6b308459.jpg">
 
 ------Icon badge used---------<br>
