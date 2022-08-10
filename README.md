@@ -40,18 +40,20 @@ the deadline.
   <li>We can mark whether a task has been completed or not.</li>
 </ol>
 
-# run app
+# Run app
 run 'be' folder for API data
-  .
-    ├── be                      # folder for API data
-    │   ├── connection          # connection databases use postgres
-    │   ├── process             # process controller
-    │   └── main.go             # Unit tests
-    └── fe
+> go into the folder be and run file main.go
+ 
   ```sh
   go run main.go
   ```
-
+    .
+    ├── ...
+    ├── be                    # folder for API data
+    │   ├── connection        # connection databases use postgres
+    │   ├── process           # process controller
+    │   └── main.go           # Unit tests
+    └── ...
 
 # Some Screenshots
 
