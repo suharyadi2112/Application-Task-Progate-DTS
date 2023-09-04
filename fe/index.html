@@ -9,6 +9,35 @@
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" integrity="sha512-1sCRPdkRXhBV2PBLUdRb4tMg1w2YPf37qatUFeS7zlBy7jJI8Lf4VHwWfZZfpXtYSLy85pkm9GaYVYMfw5BC1A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 	<title>Task Progate</title>
 </head>
+
+<!-- https://docs.sentry.io/platforms/javascript/install/loader/#errors--replay-bundle -->
+<script
+  src="https://browser.sentry-cdn.com/7.64.0/bundle.replay.min.js"
+  integrity="sha384-eIBhmVs6phxABM7+IIv3ns4W+ShqowNbNrv8gOqCw8sqxfvNjsA5M9c64D5Oobcv"
+  crossorigin="anonymous"
+></script>
+
+<script>
+  const replay = new Sentry.Replay({
+    maskAllText: false,
+    blockAllMedia: true,
+
+  });
+	Sentry.init({
+		dsn: "https://25a443e0b56147dd9f7552aa5ac7b14a@o4504378412105728.ingest.sentry.io/4504378428096512",
+			replaysSessionSampleRate: 1.0,
+			replaysOnErrorSampleRate: 1.0,
+		integrations: [
+		 	replay
+		],
+	});
+	replay.start();
+
+	myUndefinedFunction();
+
+</script>	
+
+
 <body>
 
 	<div class="container-fluid p-5">
@@ -84,7 +113,7 @@
 	 $(document).ready(function() {
 	    $.ajax({
   		    type: "GET",
-		    url: 'http://localhost:9999/task',
+		    url: 'http://localhost:9009/task',
 		    dataType: 'json',
 		    success: function (obj, textstatus) {
 	            $('#tableTask').DataTable({
@@ -124,7 +153,7 @@
 			var form_data = $(this);
 			$.ajax({
 				type: 'POST',
-				url: 'http://localhost:9999/task_post',
+				url: 'http://localhost:9009/task_post',
 				data: form_data.serialize(),
 				beforeSend:function(){ 
 					$( ".btnAddtask" ).prop( "disabled", true );
@@ -146,7 +175,7 @@
 			var result = confirm("Tandai Selesai data ini ?");
 			if (result) {
 				$.ajax({
-				    url: "http://localhost:9999/task_changestatus/"+task_id,
+				    url: "http://localhost:9009/task_changestatus/"+task_id,
 				    type: 'GET',
 					success:function(data){ 
 						alert("task done :)")
@@ -166,7 +195,7 @@
 			var result = confirm("Hapus data ini ?");
 			if (result) {
 			    $.ajax({
-				    url: "http://localhost:9999/task_del/"+task_id,
+				    url: "http://localhost:9009/task_del/"+task_id,
 				    type: 'GET',
 				    beforeSend:function(){ 
 

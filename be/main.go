@@ -23,7 +23,7 @@ func main(){
     k.Use(loggingMiddleware)
 
 	fmt.Println("server started at localhost:9999")
-	http.ListenAndServe(":9999", k)//web service running
+	http.ListenAndServe("127.0.0.1:9009", k)//web service running
 }
 
 func loggingMiddleware(next http.Handler) http.Handler {
