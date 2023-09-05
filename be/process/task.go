@@ -3,9 +3,10 @@ package taskdata
 import(
 	"encoding/json"
 	"net/http"
-	outp "be_progate_task/connection"//koneksi
-
+	outp "be_progate_task/connection"//koneksiPostgres
+    amqpFunc "be_progate_task/config"//koneksi
 	"github.com/gorilla/mux"//routing mux
+    "log"
 )
 
 type Task struct {
@@ -14,6 +15,7 @@ type Task struct {
     Assignee *string `json:"assignee"`
     Deadline *string `json:"deadline"`
     Status *string `json:"status"`
+    Email *string `json:"email"`
 }
 type ResponseArr struct {
     Status string `json:"status"`
@@ -55,7 +57,7 @@ func Gettask(w http.ResponseWriter, r *http.Request){
 
     for row.Next(){//looping data
         var each = Task{}//Task dari struct
-        var err = row.Scan(&each.Id, &each.Task, &each.Assignee, &each.Status,&each.Deadline)
+        var err = row.Scan(&each.Id, &each.Task, &each.Assignee, &each.Status,&each.Deadline, &each.Email)
 
         if err != nil {
             http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -225,41 +227,61 @@ func UpTask_id(w http.ResponseWriter, r *http.Request){
 
 }
 
-//update task status selesai atau belum
-func ChangeStatusTask(w http.ResponseWriter, r *http.Request){
-
-    // semua origin mendapat ijin akses
+func ChangeStatusTask(w http.ResponseWriter, r *http.Request) {
+    // Setelah mengatasi CORS, pastikan semua origin, metode, dan header diperbolehkan
     w.Header().Set("Access-Control-Allow-Origin", "*")
-    // semua method diperbolehkan masuk
     w.Header().Set("Access-Control-Allow-Methods", "*")
-    // semua header diperbolehkan untuk disisipkan
     w.Header().Set("Access-Control-Allow-Headers", "*")
 
+    // Mengambil parameter dari URL
     vars := mux.Vars(r)
     userID := vars["userID"]
 
-	db, err := outp.Dbcon()//koneksi
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer db.Close()
+    // Koneksi database
+    db, err := outp.Dbcon()
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+    defer db.Close()
 
     CStatus := "1"
 
-	result, err := db.Exec("UPDATE task SET status = $2 WHERE id = $1" , userID, CStatus)
+    // Update status tugas di database
+    result, err := db.Exec("UPDATE task SET status = $2 WHERE id = $1", userID, CStatus)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
 
-	if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-	}
+    rows, err := result.RowsAffected()
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
 
-	rows, err := result.RowsAffected()
-	defer db.Close()
-	if rows != 1 {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}else{
-		json.NewEncoder(w).Encode("success")
-	}
+    if rows != 1 {
+        http.Error(w, "Tidak dapat mengubah status tugas", http.StatusInternalServerError)
+        return
+    }
 
+    // Koneksi ke RabbitMQ
+    amqpmRbt, err := outp.Rabbitcon()
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+    defer amqpmRbt.Close()
+
+    // Kirim pesan ke RabbitMQ untuk mengirim email
+    body := userID
+    queueName := "ProDtsSendMail"
+    err = amqpFunc.DeclareAndPublishMessage(amqpmRbt, queueName, body)
+    if err != nil {
+        log.Println("Gagal mendeklarasikan dan mengirim pesan: %v", err)
+    }
+
+    // Kirim respons JSON
+    json.NewEncoder(w).Encode("success")
 }
+

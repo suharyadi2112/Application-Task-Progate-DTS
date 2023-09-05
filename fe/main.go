@@ -40,6 +40,6 @@ func main() {
     r.Get("/edit/{task_id}", edit)//edit
 
     fmt.Println("server started at localhost:9000")
-    http.ListenAndServe(":9000", r)
+    http.ListenAndServe("127.0.0.1:9000", r)
 }
 
