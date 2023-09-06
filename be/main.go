@@ -3,13 +3,18 @@ package main
 import(
 	"net/http"
 	"fmt"
-
+    "github.com/joho/godotenv"
 	b "be_progate_task/process"//mengimport file lain untuk digunakan functionnya
 	"github.com/gorilla/mux"//mux route
+    "log"
 )
 
 func main(){
 
+    err := godotenv.Load()
+    if err != nil {
+        log.Fatal("Fail Load .env")
+    }
 	k := mux.NewRouter()
 
     // IMPORTANT: you must specify an OPTIONS method matcher for the middleware to set CORS headers
@@ -19,10 +24,11 @@ func main(){
     k.HandleFunc("/task_post", b.PostTask).Methods("POST")
     k.HandleFunc("/task_del/{userID}", b.DelTask_id).Methods("GET")
     k.HandleFunc("/task_up/{userID}", b.UpTask_id).Methods(http.MethodGet, http.MethodPut, http.MethodPatch, http.MethodOptions)
+    k.HandleFunc("/task_excel", b.PostExcel).Methods("POST")
     	
     k.Use(loggingMiddleware)
 
-	fmt.Println("server started at localhost:9999")
+	fmt.Println("server started at localhost:9009")
 	http.ListenAndServe("127.0.0.1:9009", k)//web service running
 }
 

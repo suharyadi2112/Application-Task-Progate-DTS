@@ -5,8 +5,11 @@ import(
 	"net/http"
 	outp "be_progate_task/connection"//koneksiPostgres
     amqpFunc "be_progate_task/config"//koneksi
+    helper "be_progate_task/helper"//helper
 	"github.com/gorilla/mux"//routing mux
     "log"
+    "io/ioutil"
+    "time"
 )
 
 type Task struct {
@@ -265,10 +268,10 @@ func ChangeStatusTask(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Koneksi ke RabbitMQ
+    // ---------------- AMQP -----------------//
     amqpmRbt, err := outp.Rabbitcon()
     if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
+        log.Printf("Connection Failed mrabbit")
         return
     }
     defer amqpmRbt.Close()
@@ -280,8 +283,63 @@ func ChangeStatusTask(w http.ResponseWriter, r *http.Request) {
     if err != nil {
         log.Println("Gagal mendeklarasikan dan mengirim pesan: %v", err)
     }
+    // ---------------- AMQP -----------------//
 
     // Kirim respons JSON
     json.NewEncoder(w).Encode("success")
 }
+
+
+func PostExcel(w http.ResponseWriter, r *http.Request) {
+
+    file, header, err := r.FormFile("file")
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusBadRequest)
+        return
+    }
+    defer file.Close()
+
+    TimeName := time.Now().UTC()
+    uploadURL := "static_file/excel_import_task/" + helper.TrimDateFileName(TimeName) + "_" + helper.GenerateRandomString(3) + "_" + header.Filename
+
+    fileBytes, err := ioutil.ReadAll(file)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusBadRequest)
+        return
+    }
+
+    err = ioutil.WriteFile(uploadURL, fileBytes, 0644)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusBadRequest)
+        return
+    }
+
+
+    // ---------------- AMQP -----------------//
+    amqpmRbt, err := outp.Rabbitcon()
+    if err != nil {
+        log.Printf("Connection Failed mrabbit")
+        return
+    }
+    defer amqpmRbt.Close()
+
+    // Kirim pesan ke RabbitMQ untuk memproses excel
+    queueName := "ProDtsPostExcel"
+    body := uploadURL
+    err = amqpFunc.DeclareAndPublishMessage(amqpmRbt, queueName, body)
+    if err != nil {
+        log.Println("Gagal mendeklarasikan dan mengirim pesan: %v", err)
+    }
+    // ---------------- AMQP -----------------//
+
+
+    res := map[string]interface{}{
+        "message": "Berhasil",
+        "data": "",
+        "status": 200,
+    }
+
+    json.NewEncoder(w).Encode(res)
+}
+
 
