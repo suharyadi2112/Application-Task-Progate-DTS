@@ -28,6 +28,22 @@ func GenerateRandomString(length int) string {
 	return string(result)
 }
 
+func CountNonEmptyRows(sheet *xlsx.Sheet) int {
+    count := 0
+    for i, row := range sheet.Rows {
+        if i == 0 {
+            // Skip the header row (if applicable)
+            continue
+        }
+        // Check if the row is non-empty
+        if !IsRowEmpty(row) {
+            count++
+        }
+    }
+    return count
+}
+
+
 func IsRowEmpty(row *xlsx.Row) bool {
 	for _, cell := range row.Cells {
 		if cell.String() != "" {

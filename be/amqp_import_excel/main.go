@@ -4,8 +4,11 @@ import (
 	"log"
 	outp "be_progate_task/connection"//koneksiPostgres
     helper "be_progate_task/helper"//helper
+    "github.com/joho/godotenv"
     "github.com/tealeg/xlsx"
-    "sync"
+    "github.com/schollz/progressbar/v3"
+    "github.com/pusher/pusher-http-go/v5"
+    "os"
 )
 
 type Task struct {
@@ -17,6 +20,12 @@ type Task struct {
 
 func main() {
 
+	//ENV
+    err := godotenv.Load("../.env")
+    if err != nil {
+        log.Fatal("Fail Load .env")
+    }
+
 	amqpmRbt, err := outp.Rabbitcon()
     defer amqpmRbt.Close()
 
@@ -26,6 +35,14 @@ func main() {
     	log.Fatalf(err.Error())
     }
     defer db.Close()
+
+    pusherClient := pusher.Client{
+		AppID: os.Getenv("APP_ID_PUSHER"),
+		Key: os.Getenv("KEY_PUSHER"),
+		Secret: os.Getenv("SECRET_PUSHER"),
+		Cluster: os.Getenv("CLUSTER_PUSHER"),
+		Secure: true,
+	}
 
 	q, err := amqpmRbt.QueueDeclare(
 		"ProDtsPostExcel", // Nama antrian
@@ -53,7 +70,6 @@ func main() {
 	}
 	log.Println("Waiting for messages...")
 
-
 	for msg := range msgs {
 		uploadURL := msg.Body
 		FixUrl := "../" + string(uploadURL)
@@ -63,28 +79,32 @@ func main() {
 		if err != nil {
 			log.Fatalf("Fail to open file: %s", err)
 		}
-
-		var wg sync.WaitGroup
+		
+		Firstsheet := xlFile.Sheets[0]
+		totalRows := helper.CountNonEmptyRows(Firstsheet)//hitung total row aktif
+		bar := progressbar.Default(int64(totalRows))
 
 		for _, sheet := range xlFile.Sheets {
 			for iRow, vRow := range sheet.Rows {
 				if !helper.IsRowEmpty(vRow) {
-					wg.Add(1)
-					go func(sheet *xlsx.Sheet, iRow int, wg *sync.WaitGroup) {
-						defer wg.Done()
+					func(sheet *xlsx.Sheet, iRow int) {
 						if iRow > 0 {
+							pusherClient.Trigger("my-channel", "my-event", map[string]interface{}{
+					            "percentage": iRow,
+					            "totalRows": totalRows,
+					        })
 							for _, cell := range sheet.Rows[iRow].Cells {
 								if cell.String() != "" {
-									log.Printf("%s\t", cell.String())
+									// log.Printf("%s\t", cell.String())
 								}
 							}
 						}
-					}(sheet, iRow, &wg)
+						bar.Add(1)
+					}(sheet, iRow)
 				}
 			}
 		}
-
-		wg.Wait()
+		bar.Finish()
 		log.Printf("Received: %s", msg.Body)
 	}
 
