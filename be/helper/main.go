@@ -52,3 +52,20 @@ func IsRowEmpty(row *xlsx.Row) bool {
 	}
 	return true
 }
+
+func IsValidExcelFile(fileName string) bool {
+	// Daftar ekstensi file Excel yang diizinkan
+	allowedExtensions := []string{".xlsx", ".xls"}
+
+	// Mendapatkan ekstensi file dari nama file
+	fileExtension := strings.ToLower(fileName[strings.LastIndex(fileName, "."):])
+
+	// Memeriksa apakah ekstensi file ada dalam daftar yang diizinkan
+	for _, ext := range allowedExtensions {
+		if fileExtension == ext {
+			return true // Ekstensi file valid
+		}
+	}
+
+	return false // Ekstensi file tidak valid
+}

@@ -9,14 +9,9 @@ import (
     "github.com/schollz/progressbar/v3"
     "github.com/pusher/pusher-http-go/v5"
     "os"
+    "time"
+    // "fmt"
 )
-
-type Task struct {
-    Email string `json:"email"`
-    NamaTask string `json:"task"`
-    Assignee string `json:"assignee"`
-    Deadline string `json:"deadline"`
-}
 
 func main() {
 
@@ -87,21 +82,27 @@ func main() {
 		for _, sheet := range xlFile.Sheets {
 			for iRow, vRow := range sheet.Rows {
 				if !helper.IsRowEmpty(vRow) {
-					func(sheet *xlsx.Sheet, iRow int) {
-						if iRow > 0 {
-							pusherClient.Trigger("my-channel", "my-event", map[string]interface{}{
-					            "percentage": iRow,
-					            "totalRows": totalRows,
-					        })
-							for _, cell := range sheet.Rows[iRow].Cells {
-								if cell.String() != "" {
-									// log.Printf("%s\t", cell.String())
-								}
-							}
-						}
-						bar.Add(1)
-					}(sheet, iRow)
+					if iRow > 0 {
+						pusherClient.Trigger("my-channel", "my-event", map[string]interface{}{
+				            "numberRow": iRow,
+				            "totalRows": totalRows,
+				        })
+					
+						dateValue, _ := sheet.Rows[iRow].Cells[2].GetTime(false)
+						valDateValue := dateValue.Format("2006-01-02")
+
+					    sqlStatement := `INSERT INTO task (task, assignee, deadline, status, email) VALUES ($1, $2, $3, $4, $5)`
+
+					    _, err = db.Exec(sqlStatement, sheet.Rows[iRow].Cells[0].String(), sheet.Rows[iRow].Cells[1].String(), valDateValue, 0, sheet.Rows[iRow].Cells[3].String())
+
+					    if err != nil {
+					        log.Println(err.Error())
+					        return
+					    }
+					}
+					bar.Add(1)
 				}
+				time.Sleep(1 * time.Second)
 			}
 		}
 		bar.Finish()

@@ -60,7 +60,7 @@ func Gettask(w http.ResponseWriter, r *http.Request){
 
     for row.Next(){//looping data
         var each = Task{}//Task dari struct
-        var err = row.Scan(&each.Id, &each.Task, &each.Assignee, &each.Status,&each.Deadline, &each.Email)
+        var err = row.Scan(&each.Id, &each.Task, &each.Assignee, &each.Deadline,&each.Status, &each.Email)
 
         if err != nil {
             http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -292,12 +292,22 @@ func ChangeStatusTask(w http.ResponseWriter, r *http.Request) {
 
 func PostExcel(w http.ResponseWriter, r *http.Request) {
 
-    file, header, err := r.FormFile("file")
+    // Setelah mengatasi CORS, pastikan semua origin, metode, dan header diperbolehkan
+    w.Header().Set("Access-Control-Allow-Origin", "*")
+    w.Header().Set("Access-Control-Allow-Methods", "*")
+    w.Header().Set("Access-Control-Allow-Headers", "*")
+
+    file, header, err := r.FormFile("files")
     if err != nil {
         http.Error(w, err.Error(), http.StatusBadRequest)
         return
     }
     defer file.Close()
+
+    if !helper.IsValidExcelFile(header.Filename){
+        http.Error(w, err.Error(), http.StatusBadRequest)
+        return 
+    }
 
     TimeName := time.Now().UTC()
     uploadURL := "static_file/excel_import_task/" + helper.TrimDateFileName(TimeName) + "_" + helper.GenerateRandomString(3) + "_" + header.Filename
