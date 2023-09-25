@@ -2,67 +2,46 @@ package main
 
 import (
 	"log"
-	outp "be_progate_task/connection"//koneksiPostgres
-    helper "be_progate_task/helper"//helper
+	outp "be_progate_task/connection"
+    helper "be_progate_task/helper"
+    "github.com/streadway/amqp"
     "github.com/joho/godotenv"
     "github.com/tealeg/xlsx"
     "github.com/schollz/progressbar/v3"
     "github.com/pusher/pusher-http-go/v5"
     "os"
     "time"
-    // "fmt"
 )
 
 func main() {
 
 	//ENV
-    err := godotenv.Load("../.env")
-    if err != nil {
+    if err := godotenv.Load("../.env"); err != nil {
         log.Fatal("Fail Load .env")
     }
 
-	amqpmRbt, err := outp.Rabbitcon()
+    amqpmRbt, err := outp.Rabbitcon()
     defer amqpmRbt.Close()
+    handleErr(err, "Failed to connect to RabbitMQ")
 
-	// koneksi db
-	db, err := outp.Dbcon()
-    if err != nil {
-    	log.Fatalf(err.Error())
-    }
+    db, err := outp.Dbcon()
     defer db.Close()
+    handleErr(err, "Failed to connect to the database")
 
     pusherClient := pusher.Client{
-		AppID: os.Getenv("APP_ID_PUSHER"),
-		Key: os.Getenv("KEY_PUSHER"),
-		Secret: os.Getenv("SECRET_PUSHER"),
-		Cluster: os.Getenv("CLUSTER_PUSHER"),
-		Secure: true,
-	}
+        AppID:   os.Getenv("APP_ID_PUSHER"),
+        Key:     os.Getenv("KEY_PUSHER"),
+        Secret:  os.Getenv("SECRET_PUSHER"),
+        Cluster: os.Getenv("CLUSTER_PUSHER"),
+        Secure:  true,
+    }
 
-	q, err := amqpmRbt.QueueDeclare(
-		"ProDtsPostExcel", // Nama antrian
-		true,      // durable
-		false,      // delete when unused
-		false,      // exclusive
-		false,      // no-wait
-		nil,        // arguments
-	)
-	if err != nil {
-		log.Fatalf("Failed to declare a queue: %v", err)
-	}
+    q, err := declareQueue(amqpmRbt, "ProDtsPostExcel")
+    handleErr(err, "Failed to declare a queue")
 
-	msgs, err := amqpmRbt.Consume(
-		q.Name, // Nama antrian
-		"",     // consumer
-		true,   // auto-ack
-		false,  // exclusive
-		false,  // no-local
-		false,  // no-wait
-		nil,    // args
-	)
-	if err != nil {
-		log.Fatalf("Failed to register a consumer: %v", err)
-	}
+    msgs, err := registerConsumer(amqpmRbt, q.Name)
+    handleErr(err, "Failed to register a consumer")
+   
 	log.Println("Waiting for messages...")
 
 	for msg := range msgs {
@@ -111,3 +90,31 @@ func main() {
 
 }
 
+func declareQueue(ch *amqp.Channel, queueName string) (amqp.Queue, error) {
+    return ch.QueueDeclare(
+        queueName, // Nama antrian
+        true,      // durable
+        false,     // delete when unused
+        false,     // exclusive
+        false,     // no-wait
+        nil,       // arguments
+    )
+}
+
+func registerConsumer(ch *amqp.Channel, queueName string) (<-chan amqp.Delivery, error) {
+    return ch.Consume(
+        queueName, // Nama antrian
+        "",        // consumer
+        true,      // auto-ack
+        false,     // exclusive
+        false,     // no-local
+        false,     // no-wait
+        nil,       // args
+    )
+}
+
+func handleErr(err error, msg string) {
+    if err != nil {
+        log.Fatalf("%s: %v", msg, err)
+    }
+}

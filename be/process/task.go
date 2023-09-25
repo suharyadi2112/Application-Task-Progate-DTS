@@ -292,7 +292,6 @@ func ChangeStatusTask(w http.ResponseWriter, r *http.Request) {
 
 func PostExcel(w http.ResponseWriter, r *http.Request) {
 
-    // Setelah mengatasi CORS, pastikan semua origin, metode, dan header diperbolehkan
     w.Header().Set("Access-Control-Allow-Origin", "*")
     w.Header().Set("Access-Control-Allow-Methods", "*")
     w.Header().Set("Access-Control-Allow-Headers", "*")
@@ -304,9 +303,9 @@ func PostExcel(w http.ResponseWriter, r *http.Request) {
     }
     defer file.Close()
 
-    if !helper.IsValidExcelFile(header.Filename){
-        http.Error(w, err.Error(), http.StatusBadRequest)
-        return 
+    if !helper.IsValidExcelFile(header.Filename) {
+        http.Error(w, "File is not a valid Excel file", http.StatusBadRequest)
+        return
     }
 
     TimeName := time.Now().UTC()
@@ -318,8 +317,7 @@ func PostExcel(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    err = ioutil.WriteFile(uploadURL, fileBytes, 0644)
-    if err != nil {
+    if err := ioutil.WriteFile(uploadURL, fileBytes, 0644); err != nil {
         http.Error(w, err.Error(), http.StatusBadRequest)
         return
     }
@@ -333,18 +331,18 @@ func PostExcel(w http.ResponseWriter, r *http.Request) {
     }
     defer amqpmRbt.Close()
 
-    // Kirim pesan ke RabbitMQ untuk memproses excel
+    // Send message to rabbitmq
     queueName := "ProDtsPostExcel"
     body := uploadURL
     err = amqpFunc.DeclareAndPublishMessage(amqpmRbt, queueName, body)
     if err != nil {
-        log.Println("Gagal mendeklarasikan dan mengirim pesan: %v", err)
+        log.Println("Failed declare and publish message:", err)
     }
     // ---------------- AMQP -----------------//
 
 
     res := map[string]interface{}{
-        "message": "Berhasil",
+        "message": "Sucess",
         "data": "",
         "status": 200,
     }
